@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>>|< KILO. - Alvaro Diaz</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&display=swap');
+
+        :root {
+            --accent-pink: #e88c9a;
+            --accent-glow: rgba(232, 140, 154, 0.5);
+            --dark-bg: #050304;
+            --panel-bg: rgba(20, 10, 12, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Space Grotesk', sans-serif;
+            user-select: none;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at center, #3a151f 0%, var(--dark-bg) 100%);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            padding: 2rem;
+        }
+
+        .app-grid {
+            display: grid;
+            grid-template-columns: 450px 1fr;
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            height: 85vh;
+        }
+
+        @media (max-width: 900px) {
+            .app-grid {
+                grid-template-columns: 1fr;
+                height: 95vh;
+            }
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .player-panel {
+            align-items: center;
+            padding: 3rem 2rem;
+            position: relative;
+        }
+
+        .track-info {
+            text-align: center;
+            margin-bottom: 2rem;
+            margin-top: 1rem;
+        }
+
+        .track-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+            text-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .track-artist {
+            font-size: 1rem;
+            color: var(--accent-pink);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .vinyl-container {
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            margin-bottom: 2rem;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 0 8px #080808;
+            background: #111;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: spinVinyl 8s linear infinite;
+            animation-play-state: paused; 
+        }
+
+        .vinyl-container.playing {
+            animation-play-state: running;
+        }
+
+        .vinyl-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            opacity: 0.95;
+        }
+
+        .vinyl-container::after {
+            content: '';
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            background: var(--dark-bg);
+            border-radius: 50%;
+            border: 2px solid #222;
+            box-shadow: inset 0 0 15px rgba(0,0,0,1);
+        }
+
+        @keyframes spinVinyl {
+            100% { transform: rotate(360deg); }
+        }
+
+        .controls-area {
+            width: 100%;
+            padding: 0 1rem;
+            margin-top: auto;
+        }
+
+        .progress-bar-container, .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        
+        .progress-bar-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .volume-container {
+            width: 60%;
+            margin: 1.5rem auto 0 auto;
+            justify-content: center;
+        }
+
+        .volume-container svg {
+            fill: var(--text-muted);
+            width: 20px;
+            height: 20px;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            flex-grow: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-pink);
+            box-shadow: 0 0 15px var(--accent-pink);
+            transition: transform 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.3);
+        }
+
+        .volume-container input[type="range"] { height: 4px; }
+        .volume-container input[type="range"]::-webkit-slider-thumb { width: 12px; height: 12px; }
+
+        .action-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2.5rem;
+        }
+
+        .action-icon {
+            cursor: pointer;
+            transition: transform 0.2s, filter 0.2s;
+        }
+
+        .action-icon:active { transform: scale(0.85); }
+        .action-icon svg { fill: var(--text-muted); transition: fill 0.3s; }
+        .action-icon:hover svg { fill: #fff; }
+
+        .play-action {
+            width: 70px;
+            height: 70px;
+            background: rgba(232, 140, 154, 0.05); 
+            border: 1px solid rgba(232, 140, 154, 0.15); 
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--accent-pink);
+            font-size: 1.8rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .play-action:hover {
+            background: rgba(232, 140, 154, 0.15);
+            border-color: rgba(232, 140, 154, 0.4);
+            transform: scale(1.05);
+            text-shadow: 0 0 15px var(--accent-pink);
+        }
+
+        .lyrics-panel {
+            padding: 0;
+            position: relative;
+            mask-image: linear-gradient(to bottom, transparent 5%, black 25%, black 75%, transparent 95%);
+            -webkit-mask-image: linear-gradient(to bottom, transparent 5%, black 25%, black 75%, transparent 95%);
+        }
+
+        .lyrics-scroll {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden; 
+        }
+
+        .lyrics-track {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            text-align: center;
+            padding: 0 2rem;
+        }
+
+        .lyric-line {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            /* EL ARREGLO: Límite de ancho para que al hacer zoom no se corte */
+            max-width: 75%; 
+            margin: 1.5rem auto; 
+            line-height: 1.5;
+            transition: color 0.4s ease, transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), text-shadow 0.4s ease;
+            cursor: pointer;
+            transform-origin: center;
+        }
+
+        .lyric-line:hover { color: rgba(255, 255, 255, 0.8); }
+
+        .lyric-line.active {
+            color: #fff;
+            transform: scale(1.3);
+            text-shadow: 0 0 20px var(--accent-pink);
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="audioPlayer" src="kilo.mp3"></audio>
+
+    <div class="app-grid">
+        <div class="panel player-panel">
+            <div class="track-info">
+                <div class="track-title">KILO.</div>
+                <div class="track-artist">Alvaro Diaz</div>
+            </div>
+
+            <div class="vinyl-container" id="vinyl">
+                <img src="portada.png" alt="Portada Kilo" class="vinyl-image" onerror="this.style.opacity='0'; alert('No se encontró portada.png.')">
+            </div>
+
+            <div class="controls-area">
+                <div class="progress-bar-container">
+                    <span id="currentTime">0:00</span>
+                    <input type="range" id="progressBar" value="0" max="100">
+                    <span id="totalTime">0:00</span>
+                </div>
+
+                <div class="action-row">
+                    <div class="action-icon" id="prevBtn" onclick="audioPlayer.currentTime -= 10">
+                        <svg width="28" height="28" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                    </div>
+                    
+                    <div class="action-icon play-action" id="playToggle">
+                        <span id="playIcon">>|&lt;</span>
+                        <span id="pauseIcon" style="display: none; font-size: 1.5rem; letter-spacing: 0;">||</span>
+                    </div>
+
+                    <div class="action-icon" id="nextBtn" onclick="audioPlayer.currentTime += 10">
+                        <svg width="28" height="28" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                    </div>
+                </div>
+
+                <div class="volume-container">
+                    <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+                </div>
+            </div>
+        </div>
+
+        <div class="panel lyrics-panel">
+            <div class="lyrics-scroll" id="lyricsScroll">
+                <div class="lyrics-track" id="lyricsContent">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DESFASE_SEGUNDOS = 0; 
+
+        const audioPlayer = document.getElementById('audioPlayer');
+        const playToggle = document.getElementById('playToggle');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const vinyl = document.getElementById('vinyl');
+        const progressBar = document.getElementById('progressBar');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const currentTimeEl = document.getElementById('currentTime');
+        const totalTimeEl = document.getElementById('totalTime');
+        const lyricsContainer = document.getElementById('lyricsContent');
+        const scrollContainer = document.getElementById('lyricsScroll');
+
+        const lrcData = `
+[00:02.30]Tú texteando cuando vuelve'.
+[00:05.58]Y si e' por mí, esto fuera semanal.
+[00:09.32]Esta bellaquera nunca duerme.
+[00:13.00]Por ahora no resuelve el celular, pero no e' igual, siento que
+[00:19.28]muere esto que tenemo' con el tiempo más y má', y má', y má',
+[00:27.40]má'.
+[00:28.82]Mami, esto' fucking kilos siempre lejos de ti, haciendo to'a estas
+[00:34.40]vueltas pa' tenerte aquí, like uh, que esté' cerca de mí, like
+[00:40.96]uh, para hacerte venir.
+[00:44.20]Esto' fucking kilos siempre lejos de ti, haciendo to'a estas vueltas
+[00:49.76]pa' tenerte aquí, like uh, que esté' cerca de mí, like uh, para
+[00:57.56]hacerte venir.
+[00:59.32]Qué gana' de chingarte ahora mismo, viendo los vídeo' que hicimo',
+[01:02.78]tus gemido' me hacen más que el himno, que mi hotel en otro zip
+[01:06.34]code.
+[01:06.76]Y saber que no está', no poderle llegar, de mi mente no te va',
+[01:12.10]te escucho en to'a la ciudad, yeah.
+[01:16.50]Que para eso, que sea to' tan complicado,
+[01:20.18]yo ya ni pienso en quien se me ha virado, pienso más en tus estado'
+[01:24.46]y si son par bien a tu lado.
+[01:26.82]Y ya yo soy pasado, ey, queriendo estar presente, esta bellaquera
+[01:30.98]demente, con to' lo que quiero hacerte, vuelo diez horas pa' verte,
+[01:34.42]tu mirada no me miente, si te tuviese de frente, pero no te veo
+[01:38.66]ya. Yo no soy tan malo, na'-na'-na'-na'.
+[01:43.73]Mami, estos fucking kilos siempre lejos de ti, haciendo to'a estas
+[01:48.82]vueltas pa' tenerte aquí, like uh, que esté' cerca de mí, like
+[01:55.38]uh, para hacerte venir. Esto' fucking kilos siempre lejos de ti, haciendo
+[02:03.26]to'a estas vueltas pa' tenerte aquí, like uh, que esté' cerca
+[02:09.04]de mí, like uh, para hacerte venir.. Si-si yo te quiero para siempre,
+[02:39.70]dime, ¿tú no estás diciéndome que-e-e-e-e-e-e--?
+[02:49.19]¡Ah!
+[02:49.20]Yeah.
+[02:49.72]Todo no quedó en na', to' este tiempo se perdió, to' este tiempo
+[02:54.68]no paró de andar, eso no es verdad, lo que yo pensaba hace año'
+[02:59.66]atrá', no se pue' comprar, el amor no se pue' comprar, hace tiempo
+[03:04.66]presentí que nada de esto me sirvió, tanta gente habla de ti,
+[03:09.48]la energía se descuidó-dó-dó-dó-dó.
+[03:13.18]To' estos fu-fu-fucking kilos, fucking kilos, to' estos fu-fu-fucking
+[03:19.33]kilos, fucking kilos, fu-fu-fu-fu-fu-fu-fu-fu.
+        `;
+
+        const parsedLyrics = [];
+        
+        function parseLRC(data) {
+            const lines = data.split('\n');
+            const regex = /\[(\d{2}):(\d{2}(?:\.\d{1,3})?)\](.*)/;
+            
+            lines.forEach(line => {
+                const match = line.match(regex);
+                if (match) {
+                    const minutes = parseInt(match[1]);
+                    const seconds = parseFloat(match[2]);
+                    const text = match[3].trim();
+                    parsedLyrics.push({ time: (minutes * 60) + seconds + DESFASE_SEGUNDOS, text: text });
+                }
+            });
+        }
+
+        parseLRC(lrcData);
+
+        parsedLyrics.forEach((lyric, index) => {
+            const div = document.createElement('div');
+            div.classList.add('lyric-line');
+            div.innerText = lyric.text;
+            div.id = 'line-' + index;
+            
+            div.addEventListener('click', () => {
+                audioPlayer.currentTime = lyric.time;
+            });
+            lyricsContainer.appendChild(div);
+        });
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return "0:00";
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return m + ":" + (s < 10 ? "0" : "") + s;
+        }
+
+        audioPlayer.addEventListener('loadedmetadata', () => {
+            totalTimeEl.innerText = formatTime(audioPlayer.duration);
+        });
+
+        volumeSlider.addEventListener('input', (e) => {
+            audioPlayer.volume = e.target.value;
+        });
+
+        playToggle.addEventListener('click', () => {
+            if (audioPlayer.paused) {
+                let playPromise = audioPlayer.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        vinyl.classList.add('playing');
+                        playIcon.style.display = 'none';
+                        pauseIcon.style.display = 'block';
+                        playToggle.style.boxShadow = "0 0 40px rgba(232, 140, 154, 0.4)";
+                    }).catch(error => {
+                        console.error("Error al reproducir:", error);
+                    });
+                }
+            } else {
+                audioPlayer.pause();
+                vinyl.classList.remove('playing');
+                playIcon.style.display = 'block';
+                pauseIcon.style.display = 'none';
+                playToggle.style.boxShadow = "";
+            }
+        });
+
+        let currentActiveIndex = -1;
+
+        function centerLyric(index) {
+            document.querySelectorAll('.lyric-line').forEach(el => el.classList.remove('active'));
+            const activeLine = document.getElementById('line-' + index);
+            
+            if (activeLine) {
+                activeLine.classList.add('active');
+                
+                const offset = activeLine.offsetTop + (activeLine.clientHeight / 2);
+                lyricsContainer.style.transform = `translateY(-${offset}px)`;
+            }
+        }
+
+        audioPlayer.addEventListener('timeupdate', () => {
+            const current = audioPlayer.currentTime;
+            const duration = audioPlayer.duration;
+            
+            if (!duration) return;
+
+            progressBar.value = (current / duration) * 100;
+            currentTimeEl.innerText = formatTime(current);
+
+            let activeIndex = -1;
+            for (let i = 0; i < parsedLyrics.length; i++) {
+                if (current >= parsedLyrics[i].time) {
+                    activeIndex = i;
+                } else {
+                    break; 
+                }
+            }
+
+            if (activeIndex !== currentActiveIndex && activeIndex !== -1) {
+                centerLyric(activeIndex);
+                currentActiveIndex = activeIndex;
+            }
+        });
+
+        progressBar.addEventListener('input', (e) => {
+            if(audioPlayer.duration) {
+                audioPlayer.currentTime = (e.target.value / 100) * audioPlayer.duration;
+            }
+        });
+
+        audioPlayer.addEventListener('ended', () => {
+            vinyl.classList.remove('playing');
+            playIcon.style.display = 'block';
+            pauseIcon.style.display = 'none';
+            playToggle.style.boxShadow = "";
+            progressBar.value = 0;
+            
+            currentActiveIndex = -1;
+            centerLyric(0);
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (parsedLyrics.length > 0) {
+                setTimeout(() => centerLyric(0), 100);
+            }
+        });
+        
+    </script>
+</body>
+</html>
